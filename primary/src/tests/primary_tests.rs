@@ -1,10 +1,10 @@
 use crate::block_waiter::block_waiter_tests::worker_listener;
 use crate::common::{self, certificate, committee_with_base_port, keys, temp_dir};
 use crate::grpc_server::mempool::{validator_client::ValidatorClient, GetCollectionsRequest};
-use crate::{messages, primary};
+use crate::messages;
 use std::collections::HashMap;
 use std::time::Duration;
-use worker::{primary::BatchDigest, SerializedBatchMessage, Worker};
+use worker::{SerializedBatchMessage, Worker};
 
 use super::*;
 use crypto::Hash;
@@ -108,7 +108,7 @@ async fn test_get_collections() {
         worker_id,
         committee.clone(),
         parameters,
-        worker_store,
+        worker_store, // expected struct `typed_store::Store<primary::messages::BatchDigest, _>` found struct `typed_store::Store<messages::BatchDigest, _>`
     );
 
     /*
