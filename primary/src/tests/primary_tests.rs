@@ -1,10 +1,10 @@
-use std::collections::HashMap;
-use std::time::Duration;
-
 use crate::block_waiter::block_waiter_tests::worker_listener;
 use crate::common::{self, certificate, committee_with_base_port, keys, temp_dir};
 use crate::grpc_server::mempool::{validator_client::ValidatorClient, GetCollectionsRequest};
-use crate::messages;
+use crate::{messages, primary};
+use std::collections::HashMap;
+use std::time::Duration;
+use worker::{primary::BatchDigest, SerializedBatchMessage, Worker};
 
 use super::*;
 use crypto::Hash;
@@ -91,8 +91,28 @@ async fn test_get_collections() {
 
     // Spin up a worker node for actual data (WORK IN PROGRESS)
 
-    /*
     let worker_id = 0;
+
+    // Create a new test store.
+    let worker_map = rocks::DBMap::<BatchDigest, SerializedBatchMessage>::open(
+        temp_dir(),
+        None,
+        Some("batches"),
+    )
+    .unwrap();
+    let worker_store = Store::new(worker_map);
+
+    // Spawn a `Worker` instance.
+    Worker::spawn(
+        name.clone(),
+        worker_id,
+        committee.clone(),
+        parameters,
+        worker_store,
+    );
+
+    /*
+
     let worker_address = committee
         .worker(&name, &worker_id)
         .unwrap()
@@ -116,6 +136,9 @@ async fn test_get_collections() {
 
     let response = client.get_collections(request).await.unwrap();
 
+    let actual_message = response.into_inner().message;
+    println!("{}", actual_message);
+
     // No data so expecting a BatchTimeout for now.
-    assert_eq!(true, response.into_inner().message.contains("BatchTimeout"));
+    assert_eq!(true, actual_message.contains("BatchTimeout"));
 }
