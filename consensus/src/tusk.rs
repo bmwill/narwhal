@@ -153,7 +153,7 @@ impl<PublicKey: VerifyingKey> Consensus<PublicKey> {
 
         // Listen to incoming certificates.
         while let Some(certificate) = self.rx_primary.recv().await {
-            if certificate.round() % 50 == 0 {
+            if certificate.round() % 100 == 0 {
                 println!("Received certificate round {} to sequence", certificate.round() );
             }
             for digest in certificate.header.payload.keys() {
@@ -177,7 +177,7 @@ impl<PublicKey: VerifyingKey> Consensus<PublicKey> {
                 #[cfg(not(feature = "benchmark"))]
                 info!("Committed {}", certificate.header);
 
-                if certificate.round() % 50 == 0 {
+                if certificate.round() % 100 == 0 {
                     println!("Sequenced certificate round {}", certificate.round() );
                 }
                 for digest in certificate.header.payload.keys() {
