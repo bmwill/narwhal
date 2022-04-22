@@ -96,7 +96,7 @@ where
         message: &ConsensusOutput<PublicKey>,
     ) -> SubscriberResult<()> {
         for digest in message.certificate.header.payload.keys() {
-            println!("Sending certificate containing {} to consensus", digest);
+            println!("Executing certificate containing {}", digest);
         }
 
         // Skip the certificate if it contains no transactions.
