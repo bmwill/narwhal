@@ -322,6 +322,7 @@ impl<PublicKey: VerifyingKey> Core<PublicKey> {
             println!("Sending certificate containing {} to consensus", digest);
         }
         if let Err(e) = self.tx_consensus.send(certificate).await {
+            println!("CORE FAILED TO SEND TO CONSENSUS");
             warn!(
                 "Failed to deliver certificate {} to the consensus: {}",
                 id, e
