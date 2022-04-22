@@ -269,7 +269,7 @@ impl<PublicKey: VerifyingKey> Core<PublicKey> {
     async fn process_certificate(&mut self, certificate: Certificate<PublicKey>) -> DagResult<()> {
         debug!("Processing {:?}", certificate);
         for digest in certificate.header.payload.keys() {
-            println!("Processing certificate {} -> {:?}", certificate, digest);
+            println!("Processing certificate containing {:?}", digest);
         }
 
         // Process the header embedded in the certificate if we haven't already voted for it (if we already
@@ -318,7 +318,9 @@ impl<PublicKey: VerifyingKey> Core<PublicKey> {
 
         // Send it to the consensus layer.
         let id = certificate.header.id;
-        println!("sending {certificate}" to consensus);
+        for digest in certificate.header.payload.keys() {
+            println!("Sending certificate containing {} to consensus", digest);
+        }
         if let Err(e) = self.tx_consensus.send(certificate).await {
             warn!(
                 "Failed to deliver certificate {} to the consensus: {}",
