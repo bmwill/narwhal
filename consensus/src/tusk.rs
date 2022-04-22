@@ -296,7 +296,7 @@ impl<PublicKey: VerifyingKey> Consensus<PublicKey> {
         // https://github.com/tokio-rs/tracing/pull/326
         for (name, round) in &state.last_committed {
             debug!("Latest commit of {}: Round {}", name.encode_base64(), round);
-            println!("Latest commit of {}: Round {}", name.encode_base64(), round);
+            //println!("Latest commit of {}: Round {}", name.encode_base64(), round);
         }
 
         Ok(sequence)
