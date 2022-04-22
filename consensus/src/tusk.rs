@@ -170,6 +170,10 @@ impl<PublicKey: VerifyingKey> Consensus<PublicKey> {
                 #[cfg(not(feature = "benchmark"))]
                 info!("Committed {}", certificate.header);
 
+                for digest in certificate.header.payload.keys() {
+                    println!("Sequenced certificate containing {}", digest);
+                }
+
                 #[cfg(feature = "benchmark")]
                 for digest in certificate.header.payload.keys() {
                     // NOTE: This log entry is used to compute performance.
