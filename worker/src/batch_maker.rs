@@ -118,8 +118,18 @@ impl<PublicKey: VerifyingKey> BatchMaker<PublicKey> {
         // Serialize the batch.
         self.current_batch_size = 0;
         let batch: Batch = Batch(self.current_batch.0.drain(..).collect());
+
+        let non_empty_batch = !batch.0.is_empty();
+
         let message = WorkerMessage::<PublicKey>::Batch(batch);
         let serialized = bincode::serialize(&message).expect("Failed to serialize our own batch");
+
+        if non_empty_batch {
+            use blake2::digest::Update;
+            let digest =
+                primary::BatchDigest::new(crypto::blake2b_256(|hasher| hasher.update(&serialized)));
+            println!("Batch {} contains tx!", digest);
+        }
 
         #[cfg(feature = "benchmark")]
         {

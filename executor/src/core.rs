@@ -133,7 +133,10 @@ where
                 // (as the second execution attempt will always fail).
                 debug!("Duplicate batch {batch_digest}");
                 self.execution_indices.skip_batch(total_batches);
-                println!("EXECUTOR CORE: Duplicate batch, skipping to {:?}", self.execution_indices);
+                println!(
+                    "EXECUTOR CORE: Duplicate batch, skipping to {:?}",
+                    self.execution_indices
+                );
                 return Ok(());
             }
         };
@@ -146,7 +149,6 @@ where
 
         // Execute every transaction in the batch.
         let total_transactions = transactions.len();
-        println!("EXECUTOR CORE: total txs: {total_transactions}");
         for (index, transaction) in transactions.into_iter().enumerate() {
             // Skip transactions that we already executed (after crash-recovery).
             if self
@@ -164,7 +166,6 @@ where
                 let output = (result.clone(), Self::hash(&transaction));
                 println!("EXECUTOR CORE: {output:?}");
                 if self.tx_output.send(output).await.is_err() {
-                    println!("EXECUTOR CORE: No users listening for transaction execution");
                     debug!("No users listening for transaction execution");
                 }
 
