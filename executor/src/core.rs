@@ -213,7 +213,7 @@ where
                 "Failed to deserialize transaction: {e}"
             ))),
         };
-        println!("EXECUTOR CORE: {transaction:?}");
+        //println!("EXECUTOR CORE: {transaction:?}");
 
         // Execute the transaction.
         self.execution_state
