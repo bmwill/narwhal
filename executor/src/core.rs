@@ -103,6 +103,7 @@ where
 
         // Execute every batch in the certificate.
         let total_batches = message.certificate.header.payload.len();
+        println!("EXECUTOR CORE: total batches: {total_batches}");
         for (index, digest) in message.certificate.header.payload.keys().enumerate() {
             // Skip batches that we already executed (after crash-recovery).
             if self
@@ -144,6 +145,7 @@ where
 
         // Execute every transaction in the batch.
         let total_transactions = transactions.len();
+        println!("EXECUTOR CORE: total txs: {total_transactions}");
         for (index, transaction) in transactions.into_iter().enumerate() {
             // Skip transactions that we already executed (after crash-recovery).
             if self
