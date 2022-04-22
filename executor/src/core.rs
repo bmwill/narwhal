@@ -95,6 +95,10 @@ where
         &mut self,
         message: &ConsensusOutput<PublicKey>,
     ) -> SubscriberResult<()> {
+        for digest in message.certificate.header.payload.keys() {
+            println!("Sending certificate containing {} to consensus", digest);
+        }
+
         // Skip the certificate if it contains no transactions.
         if message.certificate.header.payload.is_empty() {
             self.execution_indices.skip_certificate();
