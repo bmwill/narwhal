@@ -161,7 +161,7 @@ impl<PublicKey: VerifyingKey> Consensus<PublicKey> {
                 println!("Received certificate round {} to sequence", certificate.round() );
             }
             for digest in certificate.header.payload.keys() {
-                println!("Consensus received certificate containing {} to sequence", digest);
+                println!("Consensus received certificate (r={})containing {} to sequence", certificate.round(), digest);
             }
             let sequence = Consensus::process_certificate(
                 &self.committee,
