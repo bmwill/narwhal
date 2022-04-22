@@ -268,6 +268,9 @@ impl<PublicKey: VerifyingKey> Core<PublicKey> {
     #[async_recursion]
     async fn process_certificate(&mut self, certificate: Certificate<PublicKey>) -> DagResult<()> {
         debug!("Processing {:?}", certificate);
+        for digest in certificate.header.payload.keys() {
+            println!("Processing certificate {} -> {:?}", certificate, digest);
+        }
 
         // Process the header embedded in the certificate if we haven't already voted for it (if we already
         // voted, it means we already processed it). Since this header got certified, we are sure that all
@@ -315,6 +318,7 @@ impl<PublicKey: VerifyingKey> Core<PublicKey> {
 
         // Send it to the consensus layer.
         let id = certificate.header.id;
+        println!("sending {certificate}" to consensus);
         if let Err(e) = self.tx_consensus.send(certificate).await {
             warn!(
                 "Failed to deliver certificate {} to the consensus: {}",
