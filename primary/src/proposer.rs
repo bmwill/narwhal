@@ -99,6 +99,7 @@ impl<PublicKey: VerifyingKey> Proposer<PublicKey> {
             // NOTE: This log entry is used to compute performance.
             info!("Created {} -> {:?}", header, digest);
         }
+        println!("Created {} -> {:?}", header, digest);
 
         // Send the new header to the `Core` that will broadcast and process it.
         self.tx_core
