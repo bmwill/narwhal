@@ -147,6 +147,7 @@ impl<PublicKey: VerifyingKey> Consensus<PublicKey> {
     }
 
     async fn run(&mut self) -> StoreResult<()> {
+        println!("Consensus started");
         // The consensus state (everything else is immutable).
         let mut state = State::new(self.genesis.clone());
 
