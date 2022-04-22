@@ -73,6 +73,17 @@ impl<PublicKey: VerifyingKey> State<PublicKey> {
         self.last_committed_round = last_committed_round;
 
         // We purge all certificates past the gc depth
+
+        for (r, authority) in self.dag {
+            if r + gc_depth < last_committed_round {
+                for (_, certificate) in authority.values() {
+                    for digest in certificate.header.payload.keys() {
+                        println!("Purging certificate containing {}", digest);
+                    }
+                }
+            }
+        }
+        
         self.dag.retain(|r, _| r + gc_depth >= last_committed_round);
         for (name, round) in &self.last_committed {
             self.dag.retain(|r, authorities| {
