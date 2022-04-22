@@ -133,6 +133,7 @@ where
                 // (as the second execution attempt will always fail).
                 debug!("Duplicate batch {batch_digest}");
                 self.execution_indices.skip_batch(total_batches);
+                println!("EXECUTOR CORE: Duplicate batch, skipping to {:?}", self.execution_indices);
                 return Ok(());
             }
         };
