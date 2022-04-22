@@ -79,7 +79,7 @@ impl<PublicKey: VerifyingKey> State<PublicKey> {
                 for (_, certificate) in authority.values() {
                     for digest in certificate.header.payload.keys() {
                         println!("Purging certificate containing {}", digest);
-                        println!("Last committed rounds {:?}", last_committed);
+                        println!("Last committed rounds {:?}", self.last_committed);
 
                     }
                 }
