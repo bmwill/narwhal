@@ -155,9 +155,13 @@ where
                     .execute_transaction(transaction.clone(), total_transactions, total_batches)
                     .await;
 
+                println!("EXECUTOR CORE: {:?}", self.execution_indices);
+
                 // Output the result (eg. to notify the end-user);
                 let output = (result.clone(), Self::hash(&transaction));
+                println!("EXECUTOR CORE: {output:?}");
                 if self.tx_output.send(output).await.is_err() {
+                    println!("EXECUTOR CORE: No users listening for transaction execution");
                     debug!("No users listening for transaction execution");
                 }
 
@@ -201,6 +205,7 @@ where
                 "Failed to deserialize transaction: {e}"
             ))),
         };
+        println!("EXECUTOR CORE: {transaction:?}");
 
         // Execute the transaction.
         self.execution_state
