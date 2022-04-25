@@ -489,9 +489,11 @@ impl<PublicKey: VerifyingKey> BlockRemover<PublicKey> {
                 bincode::serialize(&message).expect("Failed to serialize delete batch request");
 
             // send the request
+            error!("Using the net");
             self.network
                 .send(worker_address, Bytes::from(serialised_message))
                 .await;
+            error!("Stop using the net");
 
             // create a key based on the provided batch ids and use it as a request
             // key to identify the channel to forward the response once the delete
