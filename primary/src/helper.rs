@@ -61,7 +61,9 @@ impl<PublicKey: VerifyingKey> Helper<PublicKey> {
                         // TODO: Remove this deserialization-serialization in the critical path.
                         let bytes = bincode::serialize(&PrimaryMessage::Certificate(certificate))
                             .expect("Failed to serialize our own certificate");
+                        tracing::error!("helper start using the net");
                         self.network.send(address, Bytes::from(bytes)).await;
+                        tracing::error!("helper stopped using the net");
                     }
                     Ok(None) => (),
                     Err(e) => error!("{e}"),

@@ -69,9 +69,11 @@ impl<PublicKey: VerifyingKey> GarbageCollector<PublicKey> {
                 // Trigger cleanup on the workers..
                 let bytes = bincode::serialize(&PrimaryWorkerMessage::<PublicKey>::Cleanup(round))
                     .expect("Failed to serialize our own message");
+                tracing::error!("gc start using the net");
                 self.network
                     .broadcast(self.addresses.clone(), Bytes::from(bytes))
                     .await;
+                tracing::error!("gc stopped using the net");
             }
         }
     }

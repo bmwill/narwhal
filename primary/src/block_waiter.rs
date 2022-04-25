@@ -612,7 +612,9 @@ impl<PublicKey: VerifyingKey> BlockWaiter<PublicKey> {
             let message = PrimaryWorkerMessage::<PublicKey>::RequestBatch(digest);
             let bytes = bincode::serialize(&message).expect("Failed to serialize batch request");
 
+            tracing::error!("block_waiter start using the net");
             self.network.send(worker_address, Bytes::from(bytes)).await;
+            tracing::error!("block_waiter stopped using the net");
 
             // mark it as pending batch. Since we assume that batches are unique
             // per block, a clean up on a block request will also clean

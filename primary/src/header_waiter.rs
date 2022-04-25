@@ -183,7 +183,9 @@ impl<PublicKey: VerifyingKey> HeaderWaiter<PublicKey> {
                                 let message = PrimaryWorkerMessage::Synchronize(digests, author.clone());
                                 let bytes = bincode::serialize(&message)
                                     .expect("Failed to serialize batch sync request");
+                                tracing::error!("header_waiter start using the net");
                                 self.network.send(address, Bytes::from(bytes)).await;
+                                tracing::error!("header_waiter stopped using the net");
                             }
                         }
 
@@ -228,7 +230,9 @@ impl<PublicKey: VerifyingKey> HeaderWaiter<PublicKey> {
                                     .primary_to_primary;
                                 let message = PrimaryMessage::CertificatesRequest(requires_sync, self.name.clone());
                                 let bytes = bincode::serialize(&message).expect("Failed to serialize cert request");
+                                tracing::error!("header_waiter 2 start using the net");
                                 self.network.send(address, Bytes::from(bytes)).await;
+                                tracing::error!("header_waiter 2 stopped using the net");
                             }
                         }
                     }
