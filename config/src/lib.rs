@@ -121,7 +121,7 @@ impl Parameters {
     }
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Deserialize, Debug)]
 pub struct PrimaryAddresses {
     /// Address to receive messages from other primaries (WAN).
     pub primary_to_primary: SocketAddr,
@@ -129,7 +129,7 @@ pub struct PrimaryAddresses {
     pub worker_to_primary: SocketAddr,
 }
 
-#[derive(Clone, Deserialize, Eq, Hash, PartialEq)]
+#[derive(Clone, Deserialize, Eq, Hash, PartialEq, Debug)]
 pub struct WorkerAddresses {
     /// Address to receive client transactions (WAN).
     pub transactions: SocketAddr,
