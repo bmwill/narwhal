@@ -282,7 +282,9 @@ impl<PublicKey: VerifyingKey> HeaderWaiter<PublicKey> {
                         .collect();
                     let message = PrimaryMessage::CertificatesRequest(retry, self.name.clone());
                     let bytes = bincode::serialize(&message).expect("Failed to serialize cert request");
+                    tracing::error!("header_waiter 3 start using the net");
                     self.network.lucky_broadcast(addresses, Bytes::from(bytes), self.sync_retry_nodes).await;
+                    tracing::error!("header_waiter 3 stopped using the net");
 
                     // Reschedule the timer.
                     timer.as_mut().reset(Instant::now() + Duration::from_millis(TIMER_RESOLUTION));
