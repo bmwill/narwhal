@@ -14,7 +14,7 @@ use config::BlockSynchronizerParameters;
 use crypto::{ed25519::Ed25519PublicKey, Hash};
 use ed25519_dalek::Signer;
 use futures::{future::try_join_all, stream::FuturesUnordered, StreamExt};
-use network::SimpleSender;
+use network::{PrimaryNetwork, PrimaryToWorkerNetwork};
 use serde::de::DeserializeOwned;
 use std::{
     collections::{HashMap, HashSet},
@@ -77,7 +77,7 @@ async fn test_successful_headers_synchronization() {
         rx_commands,
         rx_certificate_responses,
         rx_payload_availability_responses,
-        SimpleSender::new(),
+        PrimaryNetwork::default(),
         payload_store.clone(),
         BlockSynchronizerParameters::default(),
     );
@@ -229,7 +229,7 @@ async fn test_successful_payload_synchronization() {
         rx_commands,
         rx_certificate_responses,
         rx_payload_availability_responses,
-        SimpleSender::new(),
+        PrimaryNetwork::default(),
         payload_store.clone(),
         BlockSynchronizerParameters::default(),
     );
@@ -415,7 +415,8 @@ async fn test_multiple_overlapping_requests() {
         pending_requests: HashMap::new(),
         map_certificate_responses_senders: HashMap::new(),
         map_payload_availability_responses_senders: HashMap::new(),
-        network: SimpleSender::new(),
+        primary_network: PrimaryNetwork::default(),
+        worker_network: PrimaryToWorkerNetwork::default(),
         payload_store,
         certificates_synchronize_timeout: Duration::from_millis(2_000),
         payload_synchronize_timeout: Duration::from_millis(2_000),
@@ -520,7 +521,7 @@ async fn test_timeout_while_waiting_for_certificates() {
         rx_commands,
         rx_certificate_responses,
         rx_payload_availability_responses,
-        SimpleSender::new(),
+        PrimaryNetwork::default(),
         payload_store.clone(),
         BlockSynchronizerParameters::default(),
     );
