@@ -13,7 +13,7 @@ use bincode::deserialize;
 use config::BlockSynchronizerParameters;
 use crypto::{ed25519::Ed25519PublicKey, Hash};
 use ed25519_dalek::Signer;
-use futures::{future::try_join_all, stream::FuturesUnordered, StreamExt};
+use futures::{future::try_join_all, stream::FuturesUnordered};
 use network::{PrimaryNetwork, PrimaryToWorkerNetwork};
 use serde::de::DeserializeOwned;
 use std::{
@@ -23,15 +23,14 @@ use std::{
 };
 use test_utils::{
     certificate, fixture_batch_with_transactions, fixture_header_builder, keys,
-    resolve_name_and_committee,
+    resolve_name_and_committee, PrimaryToPrimaryMockServer, PrimaryToWorkerMockServer,
 };
 use tokio::{
-    net::TcpListener,
     sync::mpsc::channel,
     task::JoinHandle,
     time::{sleep, timeout},
 };
-use tokio_util::codec::{Framed, LengthDelimitedCodec};
+
 use tracing::log::debug;
 use types::{Certificate, CertificateDigest};
 
@@ -92,7 +91,7 @@ async fn test_successful_headers_synchronization() {
         .iter()
         .map(|primary| {
             println!("New primary added: {:?}", primary.1.primary_to_primary);
-            listener::<PrimaryMessage<Ed25519PublicKey>>(1, primary.1.primary_to_primary)
+            primary_listener::<PrimaryMessage<Ed25519PublicKey>>(1, primary.1.primary_to_primary)
         })
         .collect();
 
@@ -245,7 +244,10 @@ async fn test_successful_payload_synchronization() {
             .iter()
             .map(|primary| {
                 println!("New primary added: {:?}", primary.1.primary_to_primary);
-                listener::<PrimaryMessage<Ed25519PublicKey>>(1, primary.1.primary_to_primary)
+                primary_listener::<PrimaryMessage<Ed25519PublicKey>>(
+                    1,
+                    primary.1.primary_to_primary,
+                )
             })
             .collect();
 
@@ -261,7 +263,10 @@ async fn test_successful_payload_synchronization() {
         .iter()
         .map(|worker| {
             println!("New worker added: {:?}", worker.1.primary_to_worker);
-            listener::<PrimaryWorkerMessage<Ed25519PublicKey>>(-1, worker.1.primary_to_worker)
+            worker_listener::<PrimaryWorkerMessage<Ed25519PublicKey>>(
+                -1,
+                worker.1.primary_to_worker,
+            )
         })
         .collect();
 
@@ -575,27 +580,60 @@ async fn test_timeout_while_waiting_for_certificates() {
     }
 }
 
-pub fn listener<T>(num_of_expected_responses: i32, address: SocketAddr) -> JoinHandle<Vec<T>>
+pub fn primary_listener<T>(
+    num_of_expected_responses: i32,
+    address: SocketAddr,
+) -> JoinHandle<Vec<T>>
 where
     T: Send + DeserializeOwned + 'static,
 {
     tokio::spawn(async move {
-        let listener = TcpListener::bind(&address).await.unwrap();
-        let (socket, _) = listener.accept().await.unwrap();
-        let transport = Framed::new(socket, LengthDelimitedCodec::new());
-        let (_writer, mut reader) = transport.split();
-
+        let mut recv = PrimaryToPrimaryMockServer::spawn(address);
         let mut responses = Vec::new();
 
         loop {
-            match timeout(Duration::from_secs(1), reader.next()).await {
+            let message = recv
+                .recv()
+                .await
+                .expect("Failed to receive network message");
+            match deserialize::<'_, T>(&message.payload) {
+                Ok(msg) => {
+                    responses.push(msg);
+
+                    // if -1 is given, then we don't count the number of messages
+                    // but we just rely to receive as many as possible until timeout
+                    // happens when waiting for requests.
+                    if num_of_expected_responses != -1
+                        && responses.len() as i32 == num_of_expected_responses
+                    {
+                        return responses;
+                    }
+                }
+                Err(err) => {
+                    panic!("Error occurred {err}");
+                }
+            }
+        }
+    })
+}
+
+// TODO: remove this duplication with an associated type
+pub fn worker_listener<T>(num_of_expected_responses: i32, address: SocketAddr) -> JoinHandle<Vec<T>>
+where
+    T: Send + DeserializeOwned + 'static,
+{
+    tokio::spawn(async move {
+        let mut recv = PrimaryToWorkerMockServer::spawn(address);
+        let mut responses = Vec::new();
+
+        loop {
+            match timeout(Duration::from_secs(1), recv.recv()).await {
                 Err(_) => {
                     // timeout happened - just return whatever has already
                     return responses;
                 }
-                Ok(Some(Ok(received))) => {
-                    let message = received.freeze();
-                    match deserialize(&message) {
+                Ok(Some(message)) => {
+                    match deserialize::<'_, T>(&message.payload) {
                         Ok(msg) => {
                             responses.push(msg);
 
@@ -613,6 +651,7 @@ where
                         }
                     }
                 }
+                //  sender closed
                 _ => panic!("Failed to receive network message"),
             }
         }

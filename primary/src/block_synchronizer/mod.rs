@@ -191,7 +191,7 @@ impl<PublicKey: VerifyingKey> BlockSynchronizer<PublicKey> {
                 map_certificate_responses_senders: HashMap::new(),
                 map_payload_availability_responses_senders: HashMap::new(),
                 primary_network: network,
-                worker_network: Default::default(),
+                worker_network: PrimaryToWorkerNetwork::default(),
                 payload_store,
                 certificates_synchronize_timeout: parameters.certificates_synchronize_timeout,
                 payload_synchronize_timeout: parameters.payload_availability_timeout,
